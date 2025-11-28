@@ -1,41 +1,37 @@
 import pygame
-from scripts.cenas import Partida
-from scripts.cenas import Menu  # Importamos a cena 'Menu'
+from script.cenas import Menu
 
 pygame.init()
-
-tamanhoTela = [600, 400]
-tela = pygame.display.set_mode(tamanhoTela)
+tela = pygame.display.set_mode((600, 400))
 pygame.display.set_caption("FlappyBird Clone")
 relogio = pygame.time.Clock()
-corFundo = (86, 140, 214)
+cor_fundo = (86, 148, 214)
 
-# Dicionário que associa uma string (texto, indicado por "") com uma classe que no caso é Partida
-listaCenas = {
-    'partida': Partida(tela),
-    'menu': Menu(tela)  # Adicionamos o menu na cena
-}
+cena_atual = "menu"
+menu = Menu(tela)
+partida = None  # será criada quando necessário
 
-cenaAtual = 'menu'  # Mudamos para menu
-
-# Loop principal do jogo
 while True:
-    # Captura eventos
-    for e in pygame.event.get():
-        if e.type == pygame.QUIT:
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
             pygame.quit()
             exit()
-    
-    # Chamamos o dicionário listaCenas[cenaAtual] para acessar 'cenaAtual': que no caso é partida, e chamamos a função para
-    # atualizar devolvendo um valor indicando a cena nova, então pegamos esse valor e atribuímos a variável 'cenaAtual'
-    cenaAtual = listaCenas[cenaAtual].atualizar()
-    
-    # Preenche o fundo com a cor definida
-    tela.fill(corFundo)
-    
-    # Desenha a cena atual
-    listaCenas[cenaAtual].desenhar()
-    
-    # Atualiza a tela
-    relogio.tick(60)
+
+    if cena_atual == "menu":
+        cena_atual = menu.atualizar()
+        if cena_atual == "partida":
+            # Cria uma nova partida ao clicar em "Jogar"
+            from script.cenas import Partida
+            partida = Partida(tela)
+    elif cena_atual == "partida":
+        cena_atual = partida.atualizar()
+
+    tela.fill(cor_fundo)
+
+    if cena_atual == "menu":
+        menu.desenhar()
+    elif cena_atual == "partida":
+        partida.desenhar()
+
     pygame.display.flip()
+    relogio.tick(60)
